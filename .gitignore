@@ -1,0 +1,13 @@
+data/genres_original/
+data/train/
+data/val/
+
+checkpoints/*.pth
+
+__pycache__/
+*.pyc
+venv/
+.venv/
+
+.DS_Store
+Thumbs.db
