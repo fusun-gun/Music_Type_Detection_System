@@ -30,34 +30,28 @@ SEGMENT_DURATION = 3
 N_MELS = 128
 
 
-def audio_segment_to_tensor(segment, sr):
-    import numpy as np
-    from PIL import Image
+def audio_segment_to_tensor(y, sr):
+    mel = librosa.feature.melspectrogram(y=y, sr=sr, n_mels=N_MELS)
+    mel_db = librosa.power_to_db(mel, ref=np.max)
 
-    fig, ax = plt.subplots(figsize=(2.24, 2.24), dpi=100)
-    ax.axis('off')
-    fig.subplots_adjust(left=0, right=1, bottom=0, top=1)
-    
-    S = librosa.feature.melspectrogram(y=segment, sr=sr, n_mels=128, fmax=8000)
-    S_dB = librosa.power_to_db(S, ref=np.max)
-    librosa.display.specshow(S_dB, x_axis='time', y_axis='mel', sr=sr, fmax=8000, ax=ax)
-    
+    fig = plt.figure(figsize=(2.24, 2.24), dpi=100)
+    ax = plt.axes()
+    ax.set_axis_off()
+    librosa.display.specshow(mel_db, sr=sr, ax=ax)
     fig.canvas.draw()
-    
-    rgba_buffer = fig.canvas.buffer_rgba()
-    img_array = np.asarray(rgba_buffer)
-    
-    image = Image.fromarray(img_array).convert("RGB")
-    
+
+    buf = np.asarray(fig.canvas.buffer_rgba())
+    image = Image.fromarray(buf).convert("RGB")
     plt.close(fig)
-    
-    normalize = transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
+
+    normalize = transforms.Normalize(
+        mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]
+    )
     transform = transforms.Compose([
-        transforms.Resize((224, 224)),
+        transforms.Resize((IMG_SIZE, IMG_SIZE)),
         transforms.ToTensor(),
-        normalize
+        normalize,
     ])
-    
     return transform(image)
 
 

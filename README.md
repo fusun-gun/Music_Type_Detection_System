@@ -13,39 +13,64 @@ disco, hiphop, jazz, metal, pop, reggae, rock (10 tür).
 
 ### 1.1 Gereksinimler
 
-- Python 3.9 veya üzeri
-- (Opsiyonel ama önerilir) NVIDIA GPU + CUDA — eğitim süresini büyük ölçüde kısaltır
+- Python 3.9 veya üzeri (Python 3.13 dahil test edilmiştir)
 
-### 1.2 Ortamı Hazırlama
+### 1.2 Sanal Ortam Oluşturma ve Aktifleştirme
 
-Bir sanal ortam oluşturmanız önerilir:
+Proje ana dizininde bir terminal (PowerShell) açıp sanal ortamı oluşturun:
+
+```powershell
+python -m venv venv
+```
+
+Windows'ta PowerShell'in script çalıştırmayı varsayılan olarak engellemesi
+nedeniyle (`PSSecurityException` hatası alınabilir), sanal ortamı
+aktifleştirmeden önce mevcut terminal oturumu için izni geçici olarak
+esnetin:
+
+```powershell
+Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope Process
+venv\Scripts\activate
+```
+
+macOS/Linux kullanıcıları için:
 
 ```bash
-python -m venv venv
-# Windows:
-venv\Scripts\activate
-# macOS/Linux:
 source venv/bin/activate
 ```
 
-### 1.3 Kütüphaneleri Kurma
+### 1.3 Temel Kütüphanelerin Kurulumu
 
 ```bash
 pip install -r requirements.txt
 ```
 
-### 1.4 GPU Desteğini Kontrol Etme
+### 1.4 PyTorch Kurulumu (CPU veya GPU)
 
-Kurulumdan sonra CUDA'nın PyTorch tarafından görülüp görülmediğini kontrol edin:
+`requirements.txt` içinde bilerek `torch` bulunmuyor, çünkü kurulum komutu
+CPU ve GPU için farklıdır.
 
-```python
-import torch
-print(torch.cuda.is_available())   # True dönmeli
+**CPU için:**
+
+```bash
+pip install torch torchvision torchaudio
 ```
 
-`False` dönerse, `requirements.txt` CPU sürümünü kurmuş olabilir. Sisteminize
-uygun CUDA destekli kurulum komutunu şu adresten alın:
-https://pytorch.org/get-started/locally/
+**GPU için:** sisteminizdeki CUDA sürümüne uygun kurulum komutunu
+https://pytorch.org/get-started/locally/ adresinden alıp çalıştırın. Örnek:
+
+```bash
+pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu126
+```
+
+### 1.5 Kurulumu Doğrulama
+
+```bash
+python -c "import torch; print(torch.cuda.is_available())"
+```
+
+GPU kurulumu yaptıysanız `True`, CPU kurulumu yaptıysanız `False` dönmesi
+normaldir.
 
 ---
 
@@ -177,7 +202,15 @@ muzik-turu-tespiti/
 
 ---
 
-## 9. Sınırlılıklar
+## 9. Sık Karşılaşılan Kurulum Sorunları
+
+- **`PSSecurityException` (venv aktifleşmiyor):** Bölüm 1.2'deki
+  `Set-ExecutionPolicy` komutunu kullanın.
+- **`torch.cuda.is_available()` False dönüyor:** `requirements.txt`
+  CPU sürümü kurmuş olabilir; Bölüm 1.4'teki CUDA destekli kurulum
+  komutunu çalıştırın.
+
+## 10. Sınırlılıklar
 
 - GTZAN veri seti küçük (1000 orijinal parça) ve bazı türler arasında
   (örn. rock/country/disco) belirgin akustik benzerlik var, bu da
